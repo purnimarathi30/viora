@@ -36,13 +36,38 @@ with connect() as db:
       appointment_time TEXT NOT NULL,
       notes TEXT DEFAULT ''
     );
-    CREATE TABLE IF NOT EXISTS moods (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      mood TEXT NOT NULL,
-      note TEXT DEFAULT '',
-      entry_date TEXT NOT NULL
+   CREATE TABLE IF NOT EXISTS moods (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    mood TEXT NOT NULL,
+    note TEXT DEFAULT '',
+    entry_date TEXT NOT NULL,
+    entry_type TEXT NOT NULL DEFAULT 'check-in',
+    prompt TEXT DEFAULT ''
     );
     """)
+# Add new mood journal columns to existing databases.
+# This keeps previously saved entries intact.
+
+with connect() as db:
+
+    columns = {
+        row["name"]
+        for row in db.execute("PRAGMA table_info(moods)").fetchall()
+    }
+
+    if "entry_type" not in columns:
+
+        db.execute("""
+            ALTER TABLE moods
+            ADD COLUMN entry_type TEXT NOT NULL DEFAULT 'check-in'
+        """)
+
+    if "prompt" not in columns:
+
+        db.execute("""
+            ALTER TABLE moods
+            ADD COLUMN prompt TEXT DEFAULT ''
+        """)
 
 class PeriodIn(BaseModel):
     start_date: date
@@ -61,9 +86,22 @@ class AppointmentIn(BaseModel):
     notes: str = Field("", max_length=500)
 
 class MoodIn(BaseModel):
+
     mood: str = Field(min_length=1, max_length=30)
+
     note: str = Field("", max_length=1000)
+
     entry_date: date
+
+    entry_type: str = Field(
+        "check-in",
+        max_length=20
+    )
+
+    prompt: str = Field(
+        "",
+        max_length=250
+    )
 
 @app.get("/")
 def home():
@@ -133,10 +171,31 @@ def moods():
 
 @app.post("/api/moods")
 def add_mood(data: MoodIn):
+
     with connect() as db:
-        cur = db.execute("INSERT INTO moods(mood,note,entry_date) VALUES(?,?,?)",
-                         (data.mood,data.note.strip(),data.entry_date.isoformat()))
-        return dict(db.execute("SELECT * FROM moods WHERE id=?", (cur.lastrowid,)).fetchone())
+
+        cur = db.execute(
+            """
+            INSERT INTO moods
+            (mood, note, entry_date, entry_type, prompt)
+            VALUES (?, ?, ?, ?, ?)
+            """,
+
+            (
+                data.mood,
+                data.note.strip(),
+                data.entry_date.isoformat(),
+                data.entry_type,
+                data.prompt
+            )
+        )
+
+        saved_entry = db.execute(
+            "SELECT * FROM moods WHERE id = ?",
+            (cur.lastrowid,)
+        ).fetchone()
+
+        return dict(saved_entry)
 
 @app.delete("/api/moods/{item_id}")
 def remove_mood(item_id: int):
@@ -144,5 +203,7 @@ def remove_mood(item_id: int):
         cur = db.execute("DELETE FROM moods WHERE id=?", (item_id,))
     if not cur.rowcount: raise HTTPException(404, "Mood entry not found")
     return {"message":"Deleted"}
+
+
 
 app.mount("/assets", StaticFiles(directory=ROOT / "assets"), name="assets")

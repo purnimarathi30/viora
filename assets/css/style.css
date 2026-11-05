@@ -2,3 +2,541 @@
 @media(max-width:1200px){.main{padding:0 24px 20px}.quick-grid{grid-template-columns:repeat(2,1fr)}.period-layout{grid-template-columns:1fr}.period-side{grid-template-columns:1fr 1fr}.period-side>article:last-child{grid-column:1/-1}.sleep-page{margin-left:-24px;margin-right:-24px;padding-left:24px;padding-right:24px}}
 @media(max-width:850px){.sidebar{width:205px;padding:24px 12px}.main{margin-left:205px;width:calc(100% - 205px);padding:0 17px}.dash-bottom,.sleep-hero-grid,.sleep-lower,.two-col{grid-template-columns:1fr}.steps-main-visual{gap:30px}.retreat-grid{grid-template-columns:1fr 1fr}.period-side{grid-template-columns:1fr}.period-side>article:last-child{grid-column:auto}}
 @media(max-width:620px){.layout{display:block}.sidebar{position:static;width:100%;padding:13px}.logo{padding:0 6px 12px}.nav-caption,.sidebar-note,.profile{display:none}.sidebar nav{display:flex;overflow:auto}.nav{white-space:nowrap;padding:9px;font-size:10px}.main{margin:0;width:100%;padding:0 14px}.topbar{height:65px}.top-right>span{display:none}.page{padding-top:20px}.hero-art,.starfield{display:none}.hero h1,.page-intro h1{font-size:24px}.quick-grid{grid-template-columns:1fr 1fr;gap:9px}.tile{padding:13px;min-height:190px}.tile h3{font-size:15px}.dash-bottom,.period-stats,.period-actions,.retreat-grid{grid-template-columns:1fr}.period-top{align-items:flex-start;flex-direction:column}.period-main{padding:15px}.cycle-wheel{width:min(300px,78vw)}.period-side{grid-template-columns:1fr}.sleep-page{margin:15px -14px -20px;padding:23px 14px}.sleep-orb{width:200px;height:200px}.steps-focus{padding:18px}.steps-focus-top{flex-direction:column}.steps-main-visual{flex-direction:column;gap:20px}.steps-ring{width:230px;height:230px}.steps-foot{gap:10px}.steps-foot b{font-size:10px}.retreat-banner{padding:18px}.form-grid{grid-template-columns:1fr}.form-grid button{grid-column:auto}}
+
+/* =========================================
+   VIORA LOGO INTEGRATION
+========================================= */
+
+.sidebar {
+    background: linear-gradient(
+        180deg,
+        #fbf4f8 0%,
+        #ffffff 35%,
+        #ffffff 100%
+    );
+}
+
+.logo {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 135px;
+    padding: 0;
+    margin-bottom: 22px;
+    overflow: hidden;
+    border-radius: 16px;
+}
+
+.logo img {
+    display: block;
+    width: 100%;
+    height: 135px;
+    object-fit: contain;
+    mix-blend-mode: multiply;
+    opacity: .96;
+}
+
+/* =========================================
+   MOOD JOURNAL WELCOME
+========================================= */
+
+.mood-page {
+    background: #faf7ff;
+    margin: 0 -20px;
+    padding: 30px 20px 35px;
+    border-radius: 22px;
+}
+
+.mood-welcome {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px 10px 25px;
+}
+
+.mood-welcome h1 {
+    font: 800 30px Manrope;
+    margin: 7px 0;
+    color: #373149;
+}
+
+.mood-welcome h1 em {
+    color: #a391e4;
+    font-style: normal;
+}
+
+.mood-welcome p {
+    color: #9991a6;
+    font-size: 12px;
+}
+
+.mood-welcome-art {
+    background: linear-gradient(135deg, #e8dfff, #fce4ee);
+    border-radius: 50%;
+    height: 100px;
+    width: 140px;
+    display: grid;
+    place-items: center;
+    color: #a992d9;
+    font-size: 38px;
+}
+
+/* =========================================
+   WEEKLY MOOD TIMELINE
+========================================= */
+
+.mood-week-card {
+    margin-bottom: 18px;
+    background: #fff;
+}
+
+.mood-week {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 10px;
+}
+
+.mood-day {
+    border: 1px solid #eee9f5;
+    border-radius: 15px;
+    background: #fff;
+    padding: 13px 5px;
+    display: grid;
+    justify-items: center;
+    gap: 7px;
+    color: #736d82;
+}
+
+.mood-day.today {
+    background: #9487e9;
+    color: white;
+    border-color: #9487e9;
+    box-shadow: 0 6px 15px #9487e933;
+}
+
+.mood-day span {
+    font-size: 10px;
+}
+
+.mood-day strong {
+    font: 700 17px Manrope;
+}
+
+.mood-day small {
+    font-size: 19px;
+}
+
+/* =========================================
+   MAIN MOOD CHECK-IN CARD
+========================================= */
+
+.mood-checkin-panel {
+    position: relative;
+    overflow: hidden;
+    padding: 30px;
+    text-align: center;
+    border-radius: 22px;
+    background: linear-gradient(
+        120deg,
+        #e8e2ff,
+        #fbe7f1,
+        #fff0dd
+    );
+    margin-bottom: 25px;
+}
+
+.mood-checkin-panel h2 {
+    font: 800 23px Manrope;
+    margin: 10px 0;
+}
+
+.mood-checkin-panel p {
+    font-size: 12px;
+    color: #91879e;
+}
+
+.mood-checkin-decoration {
+    font-size: 28px;
+    color: #b49bdb;
+    letter-spacing: 17px;
+    margin-bottom: 12px;
+}
+
+.mood-checkin-button {
+    background: #8e80dd;
+    color: white;
+    border: 0;
+    padding: 13px 22px;
+    border-radius: 30px;
+    font-weight: 700;
+    margin-top: 10px;
+    box-shadow: 0 7px 17px #8e80dd35;
+}
+
+.mood-quick .mood-preview-faces {
+    display: flex;
+    gap: 10px;
+    margin: 15px 0;
+}
+
+.mood-preview-faces span {
+    font-size: 25px;
+}
+
+/* =========================================
+   JOURNAL FEATURE CARDS
+========================================= */
+
+.journal-section-heading {
+    margin: 26px 0 15px;
+}
+
+.journal-section-heading h2 {
+    font: 800 20px Manrope;
+    margin: 5px 0;
+}
+
+.journal-feature-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 20px;
+}
+
+.journal-feature {
+    padding: 24px;
+    min-height: 210px;
+    border-radius: 20px;
+    position: relative;
+    overflow: hidden;
+}
+
+.morning-feature {
+    background: linear-gradient(135deg, #ffe8b9, #fff1d8);
+}
+
+.evening-feature {
+    background: linear-gradient(135deg, #e5dcff, #f0e9ff);
+}
+
+.journal-icon {
+    display: block;
+    font-size: 35px;
+    margin-bottom: 13px;
+}
+
+.journal-feature>small {
+    font-size: 9px;
+    letter-spacing: 1.2px;
+    font-weight: 700;
+    color: #9e8c87;
+}
+
+.journal-feature h3 {
+    font: 800 18px Manrope;
+    margin: 9px 0;
+}
+
+.journal-feature p {
+    font-size: 11px;
+    color: #978c94;
+}
+
+.journal-write {
+    background: white;
+    color: #8d79cf;
+    margin-top: 8px;
+    border-radius: 25px;
+}
+
+/* =========================================
+   QUESTION OF THE DAY
+========================================= */
+
+.question-card {
+    background: linear-gradient(
+        110deg,
+        #e5e0ff,
+        #e0eeff
+    );
+    padding: 27px;
+    text-align: center;
+    border-radius: 20px;
+    margin-bottom: 20px;
+    position: relative;
+}
+
+.question-card>small {
+    color: #8779c6;
+    font-weight: 700;
+    letter-spacing: 1px;
+    font-size: 9px;
+}
+
+.question-card h2 {
+    font: 700 18px Manrope;
+    margin: 17px auto;
+    max-width: 600px;
+    line-height: 1.5;
+}
+
+.question-button {
+    background: white;
+    color: #8a78d2;
+    border-radius: 25px;
+}
+
+.question-refresh {
+    position: absolute;
+    right: 20px;
+    top: 18px;
+    border: 0;
+    background: transparent;
+    font-size: 25px;
+    color: #8978d1;
+}
+
+/* =========================================
+   POSITIVE MOMENTS
+========================================= */
+
+.positive-card {
+    background: linear-gradient(120deg, #f9e2ee, #f2e8ff);
+    border-radius: 20px;
+    padding: 25px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 20px;
+}
+
+.positive-card h2 {
+    font: 800 19px Manrope;
+    margin: 7px 0;
+}
+
+.positive-card p {
+    font-size: 11px;
+    color: #96899a;
+}
+
+.positive-button {
+    background: white;
+    color: #a376a1;
+    border-radius: 25px;
+}
+
+.positive-art {
+    font-size: 55px;
+    color: #c39bc6;
+}
+
+/* =========================================
+   MOOD POP-UP — NINE EMOTIONS
+========================================= */
+
+.mood-modal-backdrop {
+    backdrop-filter: blur(7px);
+    background: #30263d75;
+}
+
+.mood-picker-window {
+    background: #fffdfd;
+    width: min(510px, 95%);
+    padding: 38px;
+    border-radius: 25px;
+    position: relative;
+    text-align: center;
+    box-shadow: 0 25px 80px #30213d30;
+    max-height: 90vh;
+    overflow-y: auto;
+}
+
+.mood-picker-window h2 {
+    font: 800 25px Manrope;
+    color: #383044;
+    margin: 13px 0;
+}
+
+.mood-modal-subtitle {
+    color: #a19aaa;
+    font-size: 12px;
+    margin-bottom: 24px;
+}
+
+.feeling-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 19px;
+}
+
+.feeling-option {
+    background: transparent;
+    border: 1px solid transparent;
+    border-radius: 15px;
+    display: grid;
+    justify-items: center;
+    gap: 8px;
+    padding: 9px 5px;
+    transition: .2s;
+}
+
+.feeling-option:hover {
+    background: #f8f1fb;
+    border-color: #eadff3;
+    transform: translateY(-4px);
+}
+
+.face {
+    height: 65px;
+    width: 65px;
+    display: grid;
+    place-items: center;
+    border-radius: 50%;
+    font-size: 30px;
+    box-shadow: inset 0 -5px 12px #0000000a;
+}
+
+.face.awesome {
+    background: linear-gradient(135deg, #ffd18a, #ff935d);
+}
+.face.great {
+    background: linear-gradient(135deg, #ffe5a0, #ffbd53);
+}
+.face.loved {
+    background: linear-gradient(135deg, #ffdda1, #ff9b81);
+}
+.face.okay {
+    background: linear-gradient(135deg, #fff0a9, #f6c86d);
+}
+.face.meh {
+    background: linear-gradient(135deg, #e6e5eb, #b7b8c9);
+}
+.face.anxious {
+    background: linear-gradient(135deg, #c5f1cc, #70c88c);
+}
+.face.bad {
+    background: linear-gradient(135deg, #a9dcf3, #5fa8d1);
+}
+.face.terrible {
+    background: linear-gradient(135deg, #dfc8f2, #ae91d5);
+}
+.face.upset {
+    background: linear-gradient(135deg, #ffb0b2, #ed5a69);
+}
+
+.feeling-option small {
+    font-size: 11px;
+    font-weight: 600;
+    color: #554d61;
+}
+
+.mood-modal-footer {
+    color: #a39aa8;
+    font-size: 10px;
+    margin: 25px 0 0;
+}
+
+/* =========================================
+   JOURNAL EDITOR POP-UP
+========================================= */
+
+.mood-editor-window {
+    width: min(520px, 95%);
+    padding: 30px;
+    max-height: 90vh;
+    overflow-y: auto;
+}
+
+.mood-editor-window h2 {
+    font: 800 23px Manrope;
+    margin: 8px 0;
+}
+
+.editor-prompt {
+    color: #998da3;
+    font-size: 12px;
+    line-height: 1.6;
+    background: #f7f1fc;
+    border-radius: 12px;
+    padding: 12px;
+    margin-bottom: 18px;
+}
+
+/* =========================================
+   JOURNAL HISTORY
+========================================= */
+
+.mood-history-panel {
+    margin-top: 20px;
+}
+
+.mood-history-panel .history-item {
+    padding: 14px;
+    background: #fff;
+}
+
+.mood-entry-type {
+    display: inline-block;
+    color: #9980bf;
+    background: #f2edfa;
+    padding: 4px 8px;
+    border-radius: 20px;
+    font-size: 9px;
+    margin-top: 6px;
+}
+
+/* =========================================
+   RESPONSIVE
+========================================= */
+
+@media(max-width:850px) {
+    .journal-feature-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media(max-width:620px) {
+    .mood-page {
+        margin: 0 -14px;
+        padding: 20px 14px;
+    }
+
+    .mood-welcome-art {
+        display: none;
+    }
+
+    .mood-welcome h1 {
+        font-size: 23px;
+    }
+
+    .mood-week {
+        gap: 4px;
+    }
+
+    .mood-day {
+        padding: 10px 2px;
+    }
+
+    .mood-day strong {
+        font-size: 13px;
+    }
+
+    .feeling-grid {
+        gap: 8px;
+    }
+
+    .face {
+        height: 52px;
+        width: 52px;
+        font-size: 24px;
+    }
+
+    .mood-picker-window {
+        padding: 30px 17px;
+    }
+
+    .positive-art {
+        display: none;
+    }
+}

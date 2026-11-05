@@ -7,7 +7,7 @@ function dateText(s){return s?new Date(s+"T12:00:00").toLocaleDateString(undefin
 function view(name){document.querySelectorAll(".page").forEach(p=>p.classList.toggle("active",p.id==="page-"+name));document.querySelectorAll(".nav").forEach(n=>n.classList.toggle("active",n.dataset.view===name));let nav=document.querySelector(`.nav[data-view="${name}"]`);$("crumb").textContent=name.toUpperCase();$("topTitle").textContent=nav?nav.innerText.trim():"Your Viora space";location.hash=name;window.scrollTo(0,0)}
 document.querySelectorAll("[data-view]").forEach(a=>a.addEventListener("click",e=>{e.preventDefault();view(a.dataset.view)}));
 $("today").textContent=new Date().toLocaleDateString(undefined,{weekday:"short",month:"short",day:"numeric"});
-$("moodDate").value=today();$("apptDate").min=today();$("periodStart").max=today();$("symptomDate").value=today();
+$("moodEditorDate").value = today();$("apptDate").min=today();$("periodStart").max=today();$("symptomDate").value=today();
 function bindChecks(selector,key,countId){let saved=JSON.parse(localStorage.getItem(key)||"{}");document.querySelectorAll(selector).forEach(i=>{i.checked=!!saved[i.dataset.task||i.dataset.sleeptask];i.addEventListener("change",()=>{let k=i.dataset.task||i.dataset.sleeptask;let v=JSON.parse(localStorage.getItem(key)||"{}");v[k]=i.checked;localStorage.setItem(key,JSON.stringify(v));update()})});function update(){let all=[...document.querySelectorAll(selector)],done=all.filter(x=>x.checked).length;if($(countId))$(countId).textContent=`${done} / ${all.length}`}update()}
 bindChecks("[data-task]","viora-selfcare","taskProgress");bindChecks("[data-sleeptask]","viora-sleeptasks","sleepTaskCount");
 
@@ -51,9 +51,408 @@ $("appointmentForm").onsubmit=async e=>{e.preventDefault();try{await request("/a
 $("appointmentList").onclick=async e=>{let b=e.target.closest("[data-appt-del]");if(b){await request("/api/appointments/"+b.dataset.apptDel,{method:"DELETE"});loadAppointments()}};
 
 // MOOD JOURNAL: backend
-async function loadMoods(){let a=await request("/api/moods");$("moodList").innerHTML=a.length?a.map(x=>`<div class="history-item"><div><b>${esc(x.mood)} · ${dateText(x.entry_date)}</b><small>${esc(x.note||"Mood check-in")}</small></div><button class="delete" data-mood-del="${x.id}">Delete</button></div>`).join(""):"No entries yet."}
-$("moodForm").onsubmit=async e=>{e.preventDefault();try{await request("/api/moods",{method:"POST",body:JSON.stringify({mood:$("moodValue").value,note:$("moodNote").value,entry_date:$("moodDate").value})});$("moodNote").value="";await loadMoods();toast("Journal entry saved.")}catch(err){toast(err.message)}};
-$("moodList").onclick=async e=>{let b=e.target.closest("[data-mood-del]");if(b){await request("/api/moods/"+b.dataset.moodDel,{method:"DELETE"});loadMoods()}};
-document.querySelectorAll("[data-quickmood]").forEach(b=>b.onclick=()=>{$("moodValue").value=b.dataset.quickmood;view("mood");toast("Mood selected. Add a note and save your entry.")});
-document.querySelectorAll(".interest").forEach(b=>b.onclick=()=>{b.classList.toggle("selected");b.textContent=b.classList.contains("selected")?"Interested ✓":"I'm interested";toast("Demo interest saved in this page only.")});
+
+/* =========================================
+   VIORA MOOD JOURNAL
+   FASTAPI + SQLITE BACKEND
+========================================= */
+
+let currentMoodType = "check-in";
+let currentQuestion = "";
+
+const moodEmojis = {
+    "Awesome": "😄",
+    "Great": "😍",
+    "Loved": "🥰",
+    "Okay": "😌",
+    "Meh": "😕",
+    "Anxious": "😰",
+    "Bad": "😟",
+    "Terrible": "😣",
+    "Upset": "😠",
+    "Reflecting": "✍️"
+};
+
+const entryLabels = {
+    "check-in": "Daily check-in",
+    "morning": "Morning journal",
+    "evening": "Evening journal",
+    "question": "Question of the day",
+    "positive": "Positive moment"
+};
+
+// -----------------------------------------
+// OPEN MOOD POP-UP
+// -----------------------------------------
+
+function openMoodPicker() {
+    $("moodPickerModal").classList.add("open");
+}
+
+document.querySelectorAll("[data-open-mood-picker]")
+.forEach(button => {
+    button.addEventListener("click", openMoodPicker);
+});
+
+// -----------------------------------------
+// OPEN JOURNAL EDITOR
+// -----------------------------------------
+
+function openMoodEditor(type, mood, prompt) {
+
+    currentMoodType = type;
+
+    $("moodEditorTitle").textContent =
+        entryLabels[type] || "Your little reflection";
+
+    $("moodEntryType").value = type;
+
+    $("moodEditorMood").value = mood;
+
+    $("moodEditorPrompt").textContent = prompt;
+
+    $("moodEditorNote").value = "";
+
+    $("moodEditorDate").value = today();
+
+    $("moodPickerModal").classList.remove("open");
+
+    $("moodEditorModal").classList.add("open");
+}
+
+// -----------------------------------------
+// SELECT ONE OF NINE EMOTIONS
+// -----------------------------------------
+
+document.querySelectorAll("[data-mood-choice]")
+.forEach(button => {
+
+    button.addEventListener("click", () => {
+
+        const selectedMood = button.dataset.moodChoice;
+
+        openMoodEditor(
+            "check-in",
+            selectedMood,
+            "You chose " + selectedMood +
+            ". Would you like to write a little about how you're feeling?"
+        );
+
+    });
+
+});
+
+// -----------------------------------------
+// MORNING / EVENING / POSITIVE JOURNAL
+// -----------------------------------------
+
+document.querySelectorAll("[data-journal-type]")
+.forEach(button => {
+
+    button.addEventListener("click", () => {
+
+        const type = button.dataset.journalType;
+
+        const journalPrompts = {
+
+            morning: "What is one intention you want to set for today?",
+
+            evening: "What was one meaningful moment from your day?",
+
+            positive: "Write one small thing that made you smile today."
+
+        };
+
+        const defaultMood = {
+            morning: "Great",
+            evening: "Okay",
+            positive: "Loved"
+        };
+
+        openMoodEditor(
+            type,
+            defaultMood[type],
+            journalPrompts[type]
+        );
+
+    });
+
+});
+
+// -----------------------------------------
+// DAILY REFLECTION QUESTIONS
+// -----------------------------------------
+
+const dailyQuestions = [
+
+    "What is one thing you can do today to make yourself feel better?",
+
+    "What made you smile recently?",
+
+    "What is something you are grateful for today?",
+
+    "What is one thing you would like to let go of?",
+
+    "What is something you love about yourself?",
+
+    "What would your ideal peaceful day look like?",
+
+    "What is one small achievement you are proud of?"
+
+];
+
+let questionIndex = new Date().getDate() % dailyQuestions.length;
+
+function displayQuestion() {
+
+    currentQuestion = dailyQuestions[questionIndex];
+
+    $("dailyQuestion").textContent = currentQuestion;
+
+}
+
+displayQuestion();
+
+$("newQuestion").addEventListener("click", () => {
+
+    questionIndex =
+        (questionIndex + 1) % dailyQuestions.length;
+
+    displayQuestion();
+
+});
+
+$("writeQuestion").addEventListener("click", () => {
+
+    openMoodEditor(
+        "question",
+        "Reflecting",
+        currentQuestion
+    );
+
+});
+
+// -----------------------------------------
+// SAVE A JOURNAL ENTRY TO BACKEND
+// -----------------------------------------
+
+$("moodEntryForm").addEventListener("submit", async event => {
+
+    event.preventDefault();
+
+    try {
+
+        const moodData = {
+
+            mood: $("moodEditorMood").value,
+
+            note: $("moodEditorNote").value.trim(),
+
+            entry_date: $("moodEditorDate").value,
+
+            entry_type: currentMoodType,
+
+            prompt: $("moodEditorPrompt").textContent
+
+        };
+
+        await request("/api/moods", {
+
+            method: "POST",
+
+            body: JSON.stringify(moodData)
+
+        });
+
+        $("moodEditorModal").classList.remove("open");
+
+        $("moodEntryForm").reset();
+
+        await loadMoods();
+
+        toast("Your journal entry has been saved ♡");
+
+    }
+
+    catch(error) {
+
+        toast(error.message);
+
+    }
+
+});
+
+// -----------------------------------------
+// WEEKLY MOOD TIMELINE
+// -----------------------------------------
+
+function localDateString(date) {
+
+    const year = date.getFullYear();
+
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+
+    const day = String(date.getDate()).padStart(2, "0");
+
+    return `${year}-${month}-${day}`;
+
+}
+
+function renderMoodWeek(entries) {
+
+    const container = $("moodWeek");
+
+    const items = [];
+
+    for (let i = 6; i >= 0; i--) {
+
+        const date = new Date();
+
+        date.setDate(date.getDate() - i);
+
+        const dateString = localDateString(date);
+
+        const entry = entries.find(
+            item => item.entry_date === dateString
+        );
+
+        const weekday = date.toLocaleDateString(
+            "en",
+            { weekday: "short" }
+        );
+
+        const emoji = entry
+            ? (moodEmojis[entry.mood] || "♡")
+            : "·";
+
+        const todayClass = i === 0 ? "today" : "";
+
+        items.push(`
+            <div class="mood-day ${todayClass}">
+                <span>${weekday}</span>
+                <strong>${date.getDate()}</strong>
+                <small>${emoji}</small>
+            </div>
+        `);
+
+    }
+
+    container.innerHTML = items.join("");
+
+}
+
+// -----------------------------------------
+// DISPLAY SAVED MOOD AND JOURNAL ENTRIES
+// -----------------------------------------
+
+async function loadMoods() {
+
+    try {
+
+        const entries = await request("/api/moods");
+
+        renderMoodWeek(entries);
+
+        const container = $("moodList");
+
+        if (!entries.length) {
+
+            container.innerHTML =
+                "No entries yet. Start with your first check-in!";
+
+            return;
+
+        }
+
+        container.innerHTML = entries.map(entry => {
+
+            const emoji =
+                moodEmojis[entry.mood] || "♡";
+
+            const category =
+                entryLabels[entry.entry_type] ||
+                "Journal entry";
+
+            return `
+
+                <div class="history-item">
+
+                    <div>
+
+                        <b>
+                            ${emoji}
+                            ${esc(entry.mood)}
+                        </b>
+
+                        <small>
+                            ${dateText(entry.entry_date)}
+                        </small>
+
+                        <span class="mood-entry-type">
+                            ${category}
+                        </span>
+
+                        ${
+                            entry.prompt
+                            ? `<small>${esc(entry.prompt)}</small>`
+                            : ""
+                        }
+
+                        <p>${esc(entry.note || "Mood check-in")}</p>
+
+                    </div>
+
+                    <button
+                        class="delete"
+                        data-mood-del="${entry.id}">
+                        Delete
+                    </button>
+
+                </div>
+
+            `;
+
+        }).join("");
+
+    }
+
+    catch(error) {
+
+        console.error("Mood loading error:", error);
+
+    }
+
+}
+
+// -----------------------------------------
+// DELETE JOURNAL ENTRY
+// -----------------------------------------
+
+$("moodList").addEventListener("click", async event => {
+
+    const button = event.target.closest("[data-mood-del]");
+
+    if (!button) return;
+
+    try {
+
+        await request(
+            "/api/moods/" + button.dataset.moodDel,
+            { method: "DELETE" }
+        );
+
+        await loadMoods();
+
+        toast("Journal entry deleted.");
+
+    }
+
+    catch(error) {
+
+        toast(error.message);
+
+    }
+
+});
+
 loadPeriods();loadSymptoms();loadAppointments();loadMoods();let initial=location.hash.slice(1);if(initial&&$("page-"+initial))view(initial);
